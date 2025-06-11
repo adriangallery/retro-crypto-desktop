@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Draggable from 'react-draggable';
 import { useDesktopStore } from '../store/desktopStore';
 import deskBg from '../assets/desk.png';
@@ -17,8 +17,12 @@ export const Desktop: React.FC = () => {
     updateIcon, 
     updateWindow,
     removeWindow,
-    setActiveWindow 
+    setActiveWindow,
+    activeWindowId
   } = useDesktopStore();
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
   useEffect(() => {
     // Inicializar iconos del escritorio
@@ -33,21 +37,31 @@ export const Desktop: React.FC = () => {
   }, [addIcon]);
 
   const handleDiskClick = () => {
-    addWindow({
-      title: 'Color',
-      content: <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />,
-      position: { x: 100, y: 100 },
-      size: { width: 400, height: 300 }
-    });
+    if (!isDragging) {
+      addWindow({
+        title: 'Color',
+        content: <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />,
+        position: { x: 100, y: 100 },
+        size: { width: 400, height: 300 }
+      });
+    }
+  };
+
+  const handleIconDragStart = (iconId: string) => {
+    setIsDragging(true);
+    setSelectedIcon(iconId);
+  };
+
+  const handleIconDragStop = () => {
+    setIsDragging(false);
+    setSelectedIcon(null);
   };
 
   return (
     <div 
-      className="w-screen h-screen relative overflow-hidden"
+      className="desktop-bg"
       style={{
         backgroundImage: `url(${deskBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
       }}
     >
       {/* Iconos del escritorio */}
@@ -55,22 +69,28 @@ export const Desktop: React.FC = () => {
         <Draggable
           key={icon.id}
           position={icon.position}
+          onStart={() => handleIconDragStart(icon.id)}
           onStop={(_, data) => {
+            handleIconDragStop();
             updateIcon(icon.id, {
               position: { x: data.x, y: data.y }
             });
           }}
+          bounds="parent"
         >
           <div 
-            className="absolute cursor-move select-none"
+            className={`icon absolute cursor-move select-none ${
+              selectedIcon === icon.id ? 'scale-110' : ''
+            }`}
             onClick={() => icon.image === diskIcon && handleDiskClick()}
           >
             <img 
               src={icon.image} 
               alt={icon.label} 
               className="w-16 h-16 object-contain"
+              draggable="false"
             />
-            <div className="text-center text-white text-sm mt-1">
+            <div className="icon-label text-center text-white text-sm mt-1">
               {icon.label}
             </div>
           </div>
@@ -87,9 +107,12 @@ export const Desktop: React.FC = () => {
               position: { x: data.x, y: data.y }
             });
           }}
+          bounds="parent"
         >
           <div 
-            className="absolute bg-white border-2 border-gray-400 shadow-lg"
+            className={`window absolute bg-white border-2 border-gray-400 shadow-lg ${
+              window.id === activeWindowId ? 'window-active' : ''
+            }`}
             style={{
               width: window.size.width,
               height: window.size.height,
@@ -97,11 +120,11 @@ export const Desktop: React.FC = () => {
             }}
             onClick={() => setActiveWindow(window.id)}
           >
-            <div className="bg-gray-200 p-1 flex justify-between items-center">
+            <div className="bg-gray-200 p-1 flex justify-between items-center cursor-move">
               <div className="text-sm font-bold">{window.title}</div>
               <button
                 onClick={() => removeWindow(window.id)}
-                className="w-4 h-4 bg-red-500 rounded-full"
+                className="w-4 h-4 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
               />
             </div>
             <div className="p-2">{window.content}</div>

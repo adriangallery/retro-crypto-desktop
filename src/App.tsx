@@ -1,4 +1,3 @@
-import React from 'react';
 import { Desktop } from './components/Desktop';
 import { WalletConnect } from './components/WalletConnect';
 import './index.css';

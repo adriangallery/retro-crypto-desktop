@@ -4,7 +4,7 @@ import { MenuBar } from './MenuBar';
 import { DesktopIcons } from './DesktopIcons';
 import { WindowManager } from './WindowManager';
 import { WalletConnection } from './WalletConnection';
-import type { WindowData, IconData } from '../types/desktop';
+import type { WindowData } from '../types/desktop';
 
 const MacDesktop = () => {
   const [windows, setWindows] = useState<WindowData[]>([]);
@@ -40,12 +40,14 @@ const MacDesktop = () => {
   }, []);
 
   return (
-    <div className="h-screen w-full bg-[#c0c0c0] overflow-hidden select-none relative">
-      {/* Desktop Pattern */}
+    <div className="h-screen w-full overflow-hidden select-none relative">
+      {/* Desktop Background with uploaded image */}
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.4'%3E%3C/path%3E%3C/svg%3E")`,
+          backgroundImage: `url('/lovable-uploads/e24e3121-4715-430d-b5c6-9dcbc6d9644b.png')`,
+          backgroundRepeat: 'repeat',
+          imageRendering: 'pixelated'
         }}
       />
       

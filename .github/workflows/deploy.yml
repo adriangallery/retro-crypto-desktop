@@ -21,20 +21,28 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean install dependencies
+        run: |
+          npm cache clean --force
+          rm -rf node_modules
+          npm ci
 
       - name: Build
         run: npm run build
         env:
           NODE_ENV: production
+          VITE_BASE_URL: /retro-crypto-desktop
 
-      - name: Copy index.html to 404.html
-        run: cp dist/index.html dist/404.html
+      - name: Prepare dist directory
+        run: |
+          cd dist
+          cp index.html 404.html
+          touch .nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
-          clean: true 
+          clean: true
+          single-commit: true 

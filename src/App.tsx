@@ -1,15 +1,15 @@
 import React from 'react';
-import Desktop from './components/Desktop';
-import WalletConnect from './components/WalletConnect';
+import { Desktop } from './components/Desktop';
+import { WalletConnect } from './components/WalletConnect';
 import './index.css';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <div className="h-screen w-full overflow-hidden">
+    <div className="w-screen h-screen">
       <Desktop />
       <WalletConnect />
     </div>
   );
-};
+}
 
 export default App;

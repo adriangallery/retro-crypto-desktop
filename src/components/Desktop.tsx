@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { useDesktopStore } from '../store/desktopStore';
-import deskBg from '../assets/Desk.png';
-import docIcon from '../assets/Doc.png';
-import folderIcon from '../assets/Folder_1.png';
-import trashIcon from '../assets/Trash.png';
+import deskBg from '../assets/desk.png';
+import docIcon from '../assets/doc.png';
+import folderIcon from '../assets/folder_1.png';
+import trashIcon from '../assets/trash.png';
 import diskIcon from '../assets/Disc_5.png';
-import colorWindow from '../assets/Color.png';
+import colorWindow from '../assets/color.png';
 
 export const Desktop: React.FC = () => {
   const { 

@@ -112,30 +112,73 @@ export const Desktop: React.FC = () => {
     let windowContent;
     let windowTitle = icon.label;
     let windowSize = { width: 400, height: 300 };
+    let imageToLoad;
 
     switch (iconId) {
       case 'disk':
-        windowContent = <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />;
+        imageToLoad = colorWindow;
         break;
       case 'doc':
-        windowContent = <img src={docWindow} alt="Document Window" className="w-full h-full object-contain" />;
+        imageToLoad = docWindow;
         break;
       case 'folder':
-        windowContent = <img src={lineWindow} alt="Line Window" className="w-full h-full object-contain" />;
+        imageToLoad = lineWindow;
         break;
       case 'trash':
-        windowContent = <img src={paperWindow} alt="Paper Window" className="w-full h-full object-contain" />;
+        imageToLoad = paperWindow;
         break;
       default:
         return;
     }
 
-    addWindow({
-      title: windowTitle,
-      content: windowContent,
-      position: { x: 100, y: 100 },
-      size: windowSize
-    });
+    // Cargar la imagen para obtener sus dimensiones
+    const img = new Image();
+    img.src = imageToLoad;
+    img.onload = () => {
+      // Calcular el tamaño de la ventana manteniendo la proporción
+      const maxWidth = window.innerWidth * 0.8;
+      const maxHeight = window.innerHeight * 0.8;
+      const aspectRatio = img.width / img.height;
+
+      if (aspectRatio > 1) {
+        // Imagen más ancha que alta
+        windowSize.width = Math.min(maxWidth, img.width);
+        windowSize.height = windowSize.width / aspectRatio;
+      } else {
+        // Imagen más alta que ancha
+        windowSize.height = Math.min(maxHeight, img.height);
+        windowSize.width = windowSize.height * aspectRatio;
+      }
+
+      // Calcular la posición en cascada
+      const cascadeOffset = 30; // Píxeles de desplazamiento para el efecto cascada
+      const basePosition = { x: 50, y: 50 }; // Posición base para la primera ventana
+      const windowCount = windows.length;
+      const position = {
+        x: basePosition.x + (windowCount * cascadeOffset),
+        y: basePosition.y + (windowCount * cascadeOffset)
+      };
+
+      // Asegurar que la ventana no se salga de la pantalla
+      position.x = Math.min(position.x, window.innerWidth - windowSize.width - 50);
+      position.y = Math.min(position.y, window.innerHeight - windowSize.height - 50);
+
+      windowContent = (
+        <img 
+          src={imageToLoad} 
+          alt={`${windowTitle} Window`} 
+          className="w-full h-full object-contain"
+          style={{ maxWidth: '100%', maxHeight: '100%' }}
+        />
+      );
+
+      addWindow({
+        title: windowTitle,
+        content: windowContent,
+        position,
+        size: windowSize
+      });
+    };
   };
 
   return (

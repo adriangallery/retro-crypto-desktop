@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Draggable from 'react-draggable';
 import { useDesktopStore } from '../store/desktopStore';
-import deskBg from '../assets/desk.png';
-import docIcon from '../assets/doc.png';
-import folderIcon from '../assets/folder_1.png';
-import trashIcon from '../assets/trash.png';
-import diskIcon from '../assets/Disc_5.png';
-import colorWindow from '../assets/color.png';
-import paperWindow from '../assets/500.png';
-import docWindow from '../assets/1000.png';
-import lineWindow from '../assets/line.png';
+import deskBg from '../../A_UI/Desk.png';
+import docIcon from '../../A_UI/Doc.png';
+import folderIcon from '../../A_UI/Folder_1.png';
+import trashIcon from '../../A_UI/Trash.png';
+import diskIcon from '../../A_UI/Disc_5.png';
+import colorWindow from '../../A_UI/Color.png';
+import paperWindow from '../../A_UI/500.png';
+import docWindow from '../../A_UI/1000.png';
+import lineWindow from '../../A_UI/Line.png';
 
 interface IconPosition {
   x: number;

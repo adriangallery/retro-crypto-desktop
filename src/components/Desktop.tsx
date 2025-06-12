@@ -105,80 +105,90 @@ export const Desktop: React.FC = () => {
     });
   }, [addIcon]);
 
+  const getWindowContent = (imageSrc: string, title: string) => {
+    return (
+      <img 
+        src={imageSrc} 
+        alt={`${title} Window`} 
+        className="w-full h-full object-contain"
+        style={{ maxWidth: '100%', maxHeight: '100%' }}
+      />
+    );
+  };
+
+  const calculateWindowSize = (imgWidth: number, imgHeight: number) => {
+    const maxWidth = window.innerWidth * 0.8;
+    const maxHeight = window.innerHeight * 0.8;
+    const aspectRatio = imgWidth / imgHeight;
+
+    if (aspectRatio > 1) {
+      return {
+        width: Math.min(maxWidth, imgWidth),
+        height: Math.min(maxWidth, imgWidth) / aspectRatio
+      };
+    } else {
+      return {
+        width: Math.min(maxHeight, imgHeight) * aspectRatio,
+        height: Math.min(maxHeight, imgHeight)
+      };
+    }
+  };
+
+  const calculateCascadePosition = (windowCount: number, windowSize: { width: number; height: number }) => {
+    const cascadeOffset = 30;
+    const basePosition = { x: 50, y: 50 };
+    const position = {
+      x: basePosition.x + (windowCount * cascadeOffset),
+      y: basePosition.y + (windowCount * cascadeOffset)
+    };
+
+    return {
+      x: Math.min(position.x, window.innerWidth - windowSize.width - 50),
+      y: Math.min(position.y, window.innerHeight - windowSize.height - 50)
+    };
+  };
+
   const handleIconClick = (iconId: string) => {
     const icon = icons.find(i => i.id === iconId);
     if (!icon) return;
 
-    let windowContent;
+    let imageSrc;
     let windowTitle = icon.label;
-    let windowSize = { width: 400, height: 300 };
-    let imageToLoad;
 
     switch (iconId) {
       case 'disk':
-        imageToLoad = colorWindow;
+        imageSrc = colorWindow;
         break;
       case 'doc':
-        imageToLoad = docWindow;
+        imageSrc = docWindow;
         break;
       case 'folder':
-        imageToLoad = lineWindow;
+        imageSrc = lineWindow;
         break;
       case 'trash':
-        imageToLoad = paperWindow;
+        imageSrc = paperWindow;
         break;
       default:
         return;
     }
 
-    // Cargar la imagen para obtener sus dimensiones
-    const img = new Image();
-    img.src = imageToLoad;
-    img.onload = () => {
-      // Calcular el tamaño de la ventana manteniendo la proporción
-      const maxWidth = window.innerWidth * 0.8;
-      const maxHeight = window.innerHeight * 0.8;
-      const aspectRatio = img.width / img.height;
-
-      if (aspectRatio > 1) {
-        // Imagen más ancha que alta
-        windowSize.width = Math.min(maxWidth, img.width);
-        windowSize.height = windowSize.width / aspectRatio;
-      } else {
-        // Imagen más alta que ancha
-        windowSize.height = Math.min(maxHeight, img.height);
-        windowSize.width = windowSize.height * aspectRatio;
-      }
-
-      // Calcular la posición en cascada
-      const cascadeOffset = 30; // Píxeles de desplazamiento para el efecto cascada
-      const basePosition = { x: 50, y: 50 }; // Posición base para la primera ventana
-      const windowCount = windows.length;
-      const position = {
-        x: basePosition.x + (windowCount * cascadeOffset),
-        y: basePosition.y + (windowCount * cascadeOffset)
-      };
-
-      // Asegurar que la ventana no se salga de la pantalla
-      position.x = Math.min(position.x, window.innerWidth - windowSize.width - 50);
-      position.y = Math.min(position.y, window.innerHeight - windowSize.height - 50);
-
-      windowContent = (
-        <img 
-          src={imageToLoad} 
-          alt={`${windowTitle} Window`} 
-          className="w-full h-full object-contain"
-          style={{ maxWidth: '100%', maxHeight: '100%' }}
-        />
-      );
-
-      addWindow({
-        title: windowTitle,
-        content: windowContent,
-        position,
-        size: windowSize
-      });
+    // Tamaños predefinidos para cada tipo de ventana
+    const windowSizes = {
+      disk: { width: 400, height: 300 },
+      doc: { width: 500, height: 400 },
+      folder: { width: 450, height: 350 },
+      trash: { width: 400, height: 300 }
     };
+
+    const windowSize = windowSizes[iconId as keyof typeof windowSizes] || { width: 400, height: 300 };
+    const position = calculateCascadePosition(windows.length, windowSize);
+
+    addWindow({
+      title: windowTitle,
+      content: getWindowContent(imageSrc, windowTitle),
+      position,
+      size: windowSize
+    });
   };
 
   return (

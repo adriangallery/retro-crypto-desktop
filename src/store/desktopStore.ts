@@ -1,82 +1,79 @@
 import { create } from 'zustand';
 import { Window, DesktopIcon, WalletState } from '../types/desktop';
 
-interface DesktopStore {
+interface DesktopState {
   windows: Window[];
   icons: DesktopIcon[];
-  wallet: WalletState;
   activeWindowId: string | null;
-  
-  // Window actions
-  addWindow: (window: Omit<Window, 'id' | 'zIndex'>) => void;
+  wallet: WalletState;
+  addWindow: (window: Omit<Window, 'id'>) => void;
   removeWindow: (id: string) => void;
   updateWindow: (id: string, updates: Partial<Window>) => void;
   setActiveWindow: (id: string | null) => void;
-  
-  // Icon actions
   addIcon: (icon: Omit<DesktopIcon, 'id'>) => void;
-  removeIcon: (id: string) => void;
   updateIcon: (id: string, updates: Partial<DesktopIcon>) => void;
-  
-  // Wallet actions
   setWalletState: (state: Partial<WalletState>) => void;
 }
 
-export const useDesktopStore = create<DesktopStore>((set) => ({
+export const useDesktopStore = create<DesktopState>((set) => ({
   windows: [],
   icons: [],
+  activeWindowId: null,
   wallet: {
     address: null,
     isConnected: false,
-    chainId: null,
+    balance: '0',
+    chainId: null
   },
-  activeWindowId: null,
-
-  addWindow: (window) => set((state) => ({
-    windows: [...state.windows, {
-      ...window,
-      id: Date.now().toString(),
-      zIndex: state.windows.length,
-    }],
-  })),
-
-  removeWindow: (id) => set((state) => ({
-    windows: state.windows.filter((w) => w.id !== id),
-    activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
-  })),
-
-  updateWindow: (id, updates) => set((state) => ({
-    windows: state.windows.map((w) =>
-      w.id === id ? { ...w, ...updates } : w
-    ),
-  })),
-
-  setActiveWindow: (id) => set((state) => ({
-    activeWindowId: id,
-    windows: state.windows.map((w) => ({
-      ...w,
-      zIndex: w.id === id ? state.windows.length : w.zIndex,
+  addWindow: (window) =>
+    set((state) => ({
+      windows: [
+        ...state.windows,
+        {
+          ...window,
+          id: Math.random().toString(36).substr(2, 9),
+          zIndex: state.windows.length + 1,
+        },
+      ],
     })),
-  })),
-
-  addIcon: (icon) => set((state) => ({
-    icons: [...state.icons, {
-      ...icon,
-      id: Date.now().toString(),
-    }],
-  })),
-
-  removeIcon: (id) => set((state) => ({
-    icons: state.icons.filter((i) => i.id !== id),
-  })),
-
-  updateIcon: (id, updates) => set((state) => ({
-    icons: state.icons.map((i) =>
-      i.id === id ? { ...i, ...updates } : i
-    ),
-  })),
-
-  setWalletState: (state) => set((store) => ({
-    wallet: { ...store.wallet, ...state },
-  })),
+  removeWindow: (id) =>
+    set((state) => ({
+      windows: state.windows.filter((window) => window.id !== id),
+      activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
+    })),
+  updateWindow: (id, updates) =>
+    set((state) => ({
+      windows: state.windows.map((window) =>
+        window.id === id ? { ...window, ...updates } : window
+      ),
+    })),
+  setActiveWindow: (id) =>
+    set((state) => ({
+      activeWindowId: id,
+      windows: state.windows.map((window) =>
+        window.id === id
+          ? { ...window, zIndex: state.windows.length + 1 }
+          : window
+      ),
+    })),
+  addIcon: (icon) =>
+    set((state) => ({
+      icons: [
+        ...state.icons,
+        {
+          ...icon,
+          id: Math.random().toString(36).substr(2, 9),
+        },
+      ],
+    })),
+  updateIcon: (id, updates) =>
+    set((state) => ({
+      icons: state.icons.map((icon) =>
+        icon.id === id ? { ...icon, ...updates } : icon
+      ),
+    })),
+  setWalletState: (state) =>
+    set((currentState) => ({
+      wallet: { ...currentState.wallet, ...state },
+    })),
 })); 

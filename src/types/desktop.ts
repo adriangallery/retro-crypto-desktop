@@ -30,4 +30,5 @@ export interface WalletState {
   address: string | null;
   isConnected: boolean;
   balance: string;
+  chainId: number | null;
 }

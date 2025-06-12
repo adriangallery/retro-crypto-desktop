@@ -86,10 +86,10 @@ export const Desktop: React.FC = () => {
   useEffect(() => {
     // Inicializar iconos con posiciones específicas
     const initialIcons = [
-      { id: 'doc', image: docIcon, position: { x: 40, y: 40 }, label: 'Documento' },
-      { id: 'folder', image: folderIcon, position: { x: 40, y: 140 }, label: 'Carpeta' },
-      { id: 'trash', image: trashIcon, position: { x: 40, y: 240 }, label: 'Papelera' },
-      { id: 'disk', image: diskIcon, position: { x: 40, y: 340 }, label: 'Disco' }
+      { image: docIcon, position: { x: 40, y: 40 }, label: 'Documento' },
+      { image: folderIcon, position: { x: 40, y: 140 }, label: 'Carpeta' },
+      { image: trashIcon, position: { x: 40, y: 240 }, label: 'Papelera' },
+      { image: diskIcon, position: { x: 40, y: 340 }, label: 'Disco' }
     ];
 
     // Limpiar iconos existentes y agregar los nuevos
@@ -97,8 +97,7 @@ export const Desktop: React.FC = () => {
       addIcon({
         image: icon.image,
         position: icon.position,
-        label: icon.label,
-        id: icon.id
+        label: icon.label
       });
     });
   }, [addIcon]);

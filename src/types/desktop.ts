@@ -16,18 +16,18 @@ export interface Window {
   content: ReactNode;
   position: Position;
   size: Size;
-  zIndex: number;
+  zIndex?: number;
 }
 
 export interface DesktopIcon {
   id: string;
   image: string;
-  position: Position;
   label: string;
+  position: Position;
 }
 
 export interface WalletState {
   address: string | null;
   isConnected: boolean;
-  chainId: number | null;
+  balance: string;
 }

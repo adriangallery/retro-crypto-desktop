@@ -8,51 +8,132 @@ import trashIcon from '../assets/trash.png';
 import diskIcon from '../assets/Disc_5.png';
 import colorWindow from '../assets/color.png';
 
+interface IconPosition {
+  x: number;
+  y: number;
+}
+
+interface DraggableIconProps {
+  id: string;
+  image: string;
+  label: string;
+  position: IconPosition;
+  onPositionChange: (id: string, newPosition: IconPosition) => void;
+  onIconClick?: () => void;
+}
+
+const DraggableIcon: React.FC<DraggableIconProps> = ({
+  id,
+  image,
+  label,
+  position,
+  onPositionChange,
+  onIconClick
+}) => {
+  const [isDragging, setIsDragging] = useState(false);
+  
+  return (
+    <Draggable
+      position={position}
+      onStart={() => setIsDragging(true)}
+      onStop={(_, data) => {
+        setIsDragging(false);
+        onPositionChange(id, { x: data.x, y: data.y });
+      }}
+      bounds="parent"
+    >
+      <div 
+        className={`absolute cursor-move ${isDragging ? 'z-50 scale-110' : 'z-10'}`}
+        style={{ transition: 'transform 0.1s' }}
+      >
+        <div 
+          className="relative"
+          onClick={(e) => {
+            if (!isDragging && onIconClick) {
+              e.stopPropagation();
+              onIconClick();
+            }
+          }}
+        >
+          <img 
+            src={image} 
+            alt={label} 
+            className="w-16 h-16 object-contain"
+            draggable="false"
+          />
+          <div className="icon-label text-center text-white text-sm mt-1 px-1">
+            {label}
+          </div>
+        </div>
+      </div>
+    </Draggable>
+  );
+};
+
 export const Desktop: React.FC = () => {
-  const { 
-    windows, 
-    icons, 
-    addWindow, 
-    addIcon, 
-    updateIcon, 
+  const {
+    windows,
+    icons,
+    addWindow,
+    addIcon,
+    updateIcon,
     updateWindow,
     removeWindow,
     setActiveWindow,
     activeWindowId
   } = useDesktopStore();
 
-  const [draggingIconId, setDraggingIconId] = useState<string | null>(null);
-
   useEffect(() => {
-    // Inicializar iconos del escritorio
+    // Inicializar iconos con posiciones específicas
     const initialIcons = [
-      { image: docIcon, position: { x: 50, y: 50 }, label: 'Documento' },
-      { image: folderIcon, position: { x: 50, y: 150 }, label: 'Carpeta' },
-      { image: trashIcon, position: { x: 50, y: 250 }, label: 'Papelera' },
-      { image: diskIcon, position: { x: 50, y: 350 }, label: 'Disco' }
+      { id: 'doc', image: docIcon, position: { x: 40, y: 40 }, label: 'Documento' },
+      { id: 'folder', image: folderIcon, position: { x: 40, y: 140 }, label: 'Carpeta' },
+      { id: 'trash', image: trashIcon, position: { x: 40, y: 240 }, label: 'Papelera' },
+      { id: 'disk', image: diskIcon, position: { x: 40, y: 340 }, label: 'Disco' }
     ];
 
-    initialIcons.forEach(icon => addIcon(icon));
+    // Limpiar iconos existentes y agregar los nuevos
+    initialIcons.forEach(icon => {
+      addIcon({
+        image: icon.image,
+        position: icon.position,
+        label: icon.label,
+        id: icon.id
+      });
+    });
   }, [addIcon]);
 
-  const handleDiskClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!draggingIconId) {
-      addWindow({
-        title: 'Color',
-        content: <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />,
-        position: { x: 100, y: 100 },
-        size: { width: 400, height: 300 }
-      });
+  const handleIconClick = (iconId: string) => {
+    const icon = icons.find(i => i.id === iconId);
+    if (!icon) return;
+
+    let windowContent;
+    let windowTitle = icon.label;
+    let windowSize = { width: 400, height: 300 };
+
+    switch (iconId) {
+      case 'disk':
+        windowContent = <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />;
+        break;
+      case 'doc':
+        windowContent = <div className="p-4">Contenido del documento</div>;
+        break;
+      case 'folder':
+        windowContent = <div className="p-4">Contenido de la carpeta</div>;
+        break;
+      case 'trash':
+        windowContent = <div className="p-4">Papelera</div>;
+        break;
+      default:
+        return;
     }
-  };
 
-  const handleIconDragStart = (iconId: string) => {
-    setDraggingIconId(iconId);
-  };
-
-  const handleIconDragStop = () => {
-    setDraggingIconId(null);
+    addWindow({
+      title: windowTitle,
+      content: windowContent,
+      position: { x: 100, y: 100 },
+      size: windowSize
+    });
   };
 
   return (
@@ -60,47 +141,27 @@ export const Desktop: React.FC = () => {
       className="desktop-bg"
       style={{
         backgroundImage: `url(${deskBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden',
+        position: 'relative'
       }}
     >
-      {/* Iconos del escritorio */}
+      {/* Iconos */}
       {icons.map((icon) => (
-        <Draggable
+        <DraggableIcon
           key={icon.id}
+          id={icon.id}
+          image={icon.image}
+          label={icon.label}
           position={icon.position}
-          onStart={() => handleIconDragStart(icon.id)}
-          onStop={(_, data) => {
-            handleIconDragStop();
-            updateIcon(icon.id, {
-              position: { x: data.x, y: data.y }
-            });
+          onPositionChange={(id, newPosition) => {
+            updateIcon(id, { position: newPosition });
           }}
-          bounds="parent"
-          disabled={draggingIconId !== null && draggingIconId !== icon.id}
-        >
-          <div 
-            className={`icon absolute select-none ${
-              draggingIconId === icon.id ? 'scale-110 z-50' : ''
-            }`}
-          >
-            <div className="icon-handle cursor-move">
-              <img 
-                src={icon.image} 
-                alt={icon.label} 
-                className="w-16 h-16 object-contain"
-                draggable="false"
-              />
-              <div className="icon-label text-center text-white text-sm mt-1">
-                {icon.label}
-              </div>
-            </div>
-            {icon.image === diskIcon && (
-              <div 
-                className="absolute inset-0 cursor-pointer"
-                onClick={handleDiskClick}
-              />
-            )}
-          </div>
-        </Draggable>
+          onIconClick={() => handleIconClick(icon.id)}
+        />
       ))}
 
       {/* Ventanas */}
@@ -108,27 +169,25 @@ export const Desktop: React.FC = () => {
         <Draggable
           key={window.id}
           position={window.position}
+          handle=".window-handle"
+          bounds="parent"
           onStop={(_, data) => {
             updateWindow(window.id, {
               position: { x: data.x, y: data.y }
             });
           }}
-          bounds="parent"
-          handle=".window-handle"
-          disabled={draggingIconId !== null}
         >
           <div 
-            className={`window absolute bg-white border-2 border-gray-400 shadow-lg ${
-              window.id === activeWindowId ? 'window-active' : ''
+            className={`absolute bg-white border-2 border-gray-400 shadow-lg rounded ${
+              window.id === activeWindowId ? 'window-active z-30' : 'z-20'
             }`}
             style={{
               width: window.size.width,
-              height: window.size.height,
-              zIndex: window.zIndex
+              height: window.size.height
             }}
             onClick={() => setActiveWindow(window.id)}
           >
-            <div className="window-handle bg-gray-200 p-1 flex justify-between items-center cursor-move">
+            <div className="window-handle bg-gray-200 p-2 flex justify-between items-center cursor-move rounded-t">
               <div className="text-sm font-bold">{window.title}</div>
               <button
                 onClick={(e) => {
@@ -138,7 +197,9 @@ export const Desktop: React.FC = () => {
                 className="w-4 h-4 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
               />
             </div>
-            <div className="p-2">{window.content}</div>
+            <div className="p-2 overflow-auto" style={{ height: 'calc(100% - 2.5rem)' }}>
+              {window.content}
+            </div>
           </div>
         </Draggable>
       ))}

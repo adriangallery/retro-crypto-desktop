@@ -116,24 +116,6 @@ export const Desktop: React.FC = () => {
     );
   };
 
-  const calculateWindowSize = (imgWidth: number, imgHeight: number) => {
-    const maxWidth = window.innerWidth * 0.8;
-    const maxHeight = window.innerHeight * 0.8;
-    const aspectRatio = imgWidth / imgHeight;
-
-    if (aspectRatio > 1) {
-      return {
-        width: Math.min(maxWidth, imgWidth),
-        height: Math.min(maxWidth, imgWidth) / aspectRatio
-      };
-    } else {
-      return {
-        width: Math.min(maxHeight, imgHeight) * aspectRatio,
-        height: Math.min(maxHeight, imgHeight)
-      };
-    }
-  };
-
   const calculateCascadePosition = (windowCount: number, windowSize: { width: number; height: number }) => {
     const cascadeOffset = 30;
     const basePosition = { x: 50, y: 50 };

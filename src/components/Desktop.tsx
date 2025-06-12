@@ -7,6 +7,9 @@ import folderIcon from '../assets/folder_1.png';
 import trashIcon from '../assets/trash.png';
 import diskIcon from '../assets/Disc_5.png';
 import colorWindow from '../assets/color.png';
+import paperWindow from '../assets/500.png';
+import docWindow from '../assets/1000.png';
+import lineWindow from '../assets/line.png';
 
 interface IconPosition {
   x: number;
@@ -115,13 +118,13 @@ export const Desktop: React.FC = () => {
         windowContent = <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />;
         break;
       case 'doc':
-        windowContent = <div className="p-4">Contenido del documento</div>;
+        windowContent = <img src={docWindow} alt="Document Window" className="w-full h-full object-contain" />;
         break;
       case 'folder':
-        windowContent = <div className="p-4">Contenido de la carpeta</div>;
+        windowContent = <img src={lineWindow} alt="Line Window" className="w-full h-full object-contain" />;
         break;
       case 'trash':
-        windowContent = <div className="p-4">Papelera</div>;
+        windowContent = <img src={paperWindow} alt="Paper Window" className="w-full h-full object-contain" />;
         break;
       default:
         return;

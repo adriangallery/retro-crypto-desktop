@@ -21,8 +21,7 @@ export const Desktop: React.FC = () => {
     activeWindowId
   } = useDesktopStore();
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [draggingIconId, setDraggingIconId] = useState<string | null>(null);
 
   useEffect(() => {
     // Inicializar iconos del escritorio
@@ -36,8 +35,9 @@ export const Desktop: React.FC = () => {
     initialIcons.forEach(icon => addIcon(icon));
   }, [addIcon]);
 
-  const handleDiskClick = () => {
-    if (!isDragging) {
+  const handleDiskClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!draggingIconId) {
       addWindow({
         title: 'Color',
         content: <img src={colorWindow} alt="Color Window" className="w-full h-full object-contain" />,
@@ -48,13 +48,11 @@ export const Desktop: React.FC = () => {
   };
 
   const handleIconDragStart = (iconId: string) => {
-    setIsDragging(true);
-    setSelectedIcon(iconId);
+    setDraggingIconId(iconId);
   };
 
   const handleIconDragStop = () => {
-    setIsDragging(false);
-    setSelectedIcon(null);
+    setDraggingIconId(null);
   };
 
   return (
@@ -77,22 +75,30 @@ export const Desktop: React.FC = () => {
             });
           }}
           bounds="parent"
+          disabled={draggingIconId !== null && draggingIconId !== icon.id}
         >
           <div 
-            className={`icon absolute cursor-move select-none ${
-              selectedIcon === icon.id ? 'scale-110' : ''
+            className={`icon absolute select-none ${
+              draggingIconId === icon.id ? 'scale-110 z-50' : ''
             }`}
-            onClick={() => icon.image === diskIcon && handleDiskClick()}
           >
-            <img 
-              src={icon.image} 
-              alt={icon.label} 
-              className="w-16 h-16 object-contain"
-              draggable="false"
-            />
-            <div className="icon-label text-center text-white text-sm mt-1">
-              {icon.label}
+            <div className="icon-handle cursor-move">
+              <img 
+                src={icon.image} 
+                alt={icon.label} 
+                className="w-16 h-16 object-contain"
+                draggable="false"
+              />
+              <div className="icon-label text-center text-white text-sm mt-1">
+                {icon.label}
+              </div>
             </div>
+            {icon.image === diskIcon && (
+              <div 
+                className="absolute inset-0 cursor-pointer"
+                onClick={handleDiskClick}
+              />
+            )}
           </div>
         </Draggable>
       ))}
@@ -108,6 +114,8 @@ export const Desktop: React.FC = () => {
             });
           }}
           bounds="parent"
+          handle=".window-handle"
+          disabled={draggingIconId !== null}
         >
           <div 
             className={`window absolute bg-white border-2 border-gray-400 shadow-lg ${
@@ -120,10 +128,13 @@ export const Desktop: React.FC = () => {
             }}
             onClick={() => setActiveWindow(window.id)}
           >
-            <div className="bg-gray-200 p-1 flex justify-between items-center cursor-move">
+            <div className="window-handle bg-gray-200 p-1 flex justify-between items-center cursor-move">
               <div className="text-sm font-bold">{window.title}</div>
               <button
-                onClick={() => removeWindow(window.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeWindow(window.id);
+                }}
                 className="w-4 h-4 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
               />
             </div>
